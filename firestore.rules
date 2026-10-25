@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 家族コード(長い文字列)を知っている人だけが、その家族のノートを読み書きできます。
+    match /families/{code} {
+      allow get: if code.size() >= 20;
+      allow create, update: if code.size() >= 20
+        && request.resource.data.keys().hasOnly(['people', 'entries']);
+      allow list, delete: if false;
+    }
+  }
+}
