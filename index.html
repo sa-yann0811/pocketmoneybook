@@ -126,6 +126,9 @@ h2{font-size:16px;margin:0;font-weight:700}
 .gform label{font-size:13px;color:var(--hero-ink2)}
 .gform input{width:100%;min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:var(--hero-ink);padding:0 12px}
 .gform input[type="date"]{color-scheme:dark}
+:root.lthero .gform input{border-color:rgba(0,0,0,.22);background:rgba(255,255,255,.55)}
+:root.lthero .gform input[type="date"]{color-scheme:light}
+:root.lthero .hbtn{border-color:rgba(0,0,0,.28)}
 .gform .row2{display:flex;gap:8px;flex-wrap:wrap}
 .hbtn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--hero-ink)}
 .hbtn.main{background:var(--hero-ink);color:var(--hero-bg);border-color:var(--hero-ink);font-weight:700}
@@ -210,6 +213,7 @@ form[data-type="out"] .submit{background:var(--out);color:var(--on-out)}
 .swatches{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .sw{width:44px;height:44px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 1px var(--line);color:#fff;font-size:20px;line-height:1;display:grid;place-items:center;padding:0;position:relative;overflow:hidden}
 .sw[aria-pressed="true"],.sw.on{box-shadow:0 0 0 3px var(--ink)}
+.sw.lt{color:#2d2a32}
 .sw.custom{background:conic-gradient(#e53935,#fdd835,#43a047,#1e88e5,#8e24aa,#e53935)}
 .sw.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%;padding:0;border:0;cursor:pointer}
 .file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
@@ -313,8 +317,8 @@ var CATS={
 var LEGACY={'たべもの・おやつ':'食べ物・おやつ','あそび・ゲーム':'遊び・ゲーム','本・ぶんぐ':'本・文具','おしゃれ・ふく':'おしゃれ・服','のりもの':'乗り物','ともだち':'友だち','しゅみ':'趣味','おこづかい':'お小遣い','おてつだい・バイト':'お手伝い・バイト'};
 var WD=['日','月','火','水','木','金','土'];
 var WDR=['にち','げつ','か','すい','もく','きん','ど'];
-var PALETTE=[['ティール','#17323a'],['青','#1b3563'],['紫','#43295f'],['ピンク','#7a2652'],['赤','#7d2626'],['オレンジ','#6b3a10'],['緑','#1c4d2e'],['グレー','#2b3238']];
-var DEFAULT_COLOR='#17323a';
+var PALETTE=[['あお','#bcd3f7'],['ぴんく','#f8cfe0'],['オレンジ','#fbd3a8'],['みどり','#cdeab6'],['水色','#bfeaf5'],['濃い緑','#8fd0a8']];
+var DEFAULT_COLOR='#bcd3f7';
 var MAXAMT=9999999;
 
 /* ---------- ふりがな ---------- */
@@ -417,15 +421,20 @@ function lum(r,g,b){
   var c=[r,g,b].map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});
   return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];
 }
+function rgbOf(hex){return [parseInt(hex.substr(1,2),16),parseInt(hex.substr(3,2),16),parseInt(hex.substr(5,2),16)]}
+function isLight(hex){var c=rgbOf(hex);return lum(c[0],c[1],c[2])>0.45}
 function fitHero(hex){
-  var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16),n=0;
+  if(isLight(hex))return hex.toLowerCase();
+  var c=rgbOf(hex),r=c[0],g=c[1],b=c[2],n=0;
   while(lum(r,g,b)>0.07&&n<40){r=Math.round(r*.92);g=Math.round(g*.92);b=Math.round(b*.92);n++}
   return '#'+h2x(r)+h2x(g)+h2x(b);
 }
+var LT_VARS={'--hero-ink':'#2d2a32','--hero-ink2':'#5c5663','--hero-in':'#0a5f53','--hero-out':'#9c2a20','--hero-track':'rgba(0,0,0,.12)'};
 function applyColor(hex){
-  var root=document.documentElement;
-  if(hex&&/^#[0-9a-fA-F]{6}$/.test(hex))root.style.setProperty('--hero-bg',fitHero(hex));
-  else root.style.removeProperty('--hero-bg');
+  var root=document.documentElement;if(!(hex&&/^#[0-9a-fA-F]{6}$/.test(hex)))hex=DEFAULT_COLOR;var ok=true,lt=isLight(hex);
+  if(ok)root.style.setProperty('--hero-bg',fitHero(hex));else root.style.removeProperty('--hero-bg');
+  Object.keys(LT_VARS).forEach(function(k){if(lt)root.style.setProperty(k,LT_VARS[k]);else root.style.removeProperty(k)});
+  root.classList.toggle('lthero',!!lt);
 }
 
 /* ---------- データ ---------- */
@@ -1092,7 +1101,7 @@ function renderSettings(){
     var on=!!p.color&&p.color.toLowerCase()===c[1];
     if(on||(!p.color&&c[1]===DEFAULT_COLOR))isPal=true;
     var pressed=on||(!p.color&&c[1]===DEFAULT_COLOR);
-    cs.append(el('button',{class:'sw',type:'button','aria-label':c[0],'aria-pressed':String(pressed),style:'background:'+fitHero(c[1]),
+    cs.append(el('button',{class:'sw'+(isLight(c[1])?' lt':''),type:'button','aria-label':c[0],'aria-pressed':String(pressed),style:'background:'+fitHero(c[1]),
       onclick:function(){p.color=c[1]===DEFAULT_COLOR?null:c[1];save();render()}},pressed?'✓':''));
   });
   var picker=el('input',{type:'color','aria-label':'好きな色を選ぶ',value:p.color||DEFAULT_COLOR,
