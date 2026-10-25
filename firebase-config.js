@@ -1,13 +1,8 @@
-// Firebaseの設定をここに貼ります（README の手順3）。
-// 貼る前は null のままで、アプリは「この端末だけ」で動きます。
-//
-// 貼り付けるときは、次のように null を { ... } に置きかえます:
-// window.FIREBASE_CONFIG = {
-//   apiKey: "...",
-//   authDomain: "...",
-//   projectId: "...",
-//   storageBucket: "...",
-//   messagingSenderId: "...",
-//   appId: "..."
-// };
-window.FIREBASE_CONFIG = null;
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA5IbLTuY0RlJTlgNTh95sF_bZ92ctPb9Q",
+  authDomain: "pocketmoneybook-b3bd4.firebaseapp.com",
+  projectId: "pocketmoneybook-b3bd4",
+  storageBucket: "pocketmoneybook-b3bd4.firebasestorage.app",
+  messagingSenderId: "151500308419",
+  appId: "1:151500308419:web:2ef65f1be7da94f39b4776"
+};
